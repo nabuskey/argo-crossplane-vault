@@ -1,0 +1,20 @@
+apiVersion: pkg.crossplane.io/v1alpha1
+kind: ControllerConfig
+metadata:
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::259950518779:role/aws-preprod-cplane-eks-aws-provider-irsa
+  name: aws-controller-config
+spec:
+  metadata:
+    annotations:
+      vault.hashicorp.com/agent-inject: "true"
+      vault.hashicorp.com/agent-inject-token: "true"
+      vault.hashicorp.com/role: crossplane
+      vault.hashicorp.com/agent-run-as-user: "2000"
+  args:
+    - --debug
+    - --enable-external-secret-stores
+  podSecurityContext:
+    fsGroup: 2000
+  
+  
