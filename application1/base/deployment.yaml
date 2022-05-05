@@ -11,6 +11,10 @@ spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/role: 'k8s-application'
+        vault.hashicorp.com/agent-inject-status: 'update'
       labels:
         app: example-app1
     spec:
