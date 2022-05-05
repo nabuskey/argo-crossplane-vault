@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/nabuskey/argo-crossplane-vault.git
     targetRevision: HEAD
-    path: kustomize
+    path: application1/dev/
   destination:
     server: https://kubernetes.default.svc
     namespace: application1
