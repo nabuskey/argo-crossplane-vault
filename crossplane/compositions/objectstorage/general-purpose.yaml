@@ -42,10 +42,10 @@ spec:
         kind: Bucket
         spec:
           publishConnectionDetailsTo:
-            name: my-bucket
+            name: app/my-bucket
             metadata:
               labels:
-                maybe: "yes"
+                awsblueprints.io/environment: dev
             configRef:
               name: vault
           deletionPolicy: Delete
@@ -71,17 +71,15 @@ spec:
             mergeOptions:
               appendSlice: true
               keepMapValues: true
-        # - fromFieldPath: spec.writeConnectionSecretToRef.namespace
-        #   toFieldPath: spec.writeConnectionSecretToRef.namespace
         - type: ToCompositeFieldPath
           fromFieldPath: metadata.annotations[crossplane.io/external-name]
           toFieldPath: status.bucketName
         - type: ToCompositeFieldPath
           fromFieldPath: status.atProvider.arn
           toFieldPath: status.bucketArn
-        # - fromFieldPath: metadata.uid
-        #   toFieldPath: spec.writeConnectionSecretToRef.name
-        #   transforms:
-        #     - type: string
-        #       string:
-        #         fmt: "%s-bucket"
+        - fromFieldPath: metadata.name
+          toFieldPath: spec.publishConnectionDetailsTo.name
+          transforms:
+            - type: string
+              string:
+                fmt: "application1/%s-bucket"
