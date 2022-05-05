@@ -97,7 +97,6 @@ spec:
           combine:
             variables:
               - fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
-              - fromFieldPath: metadata.name
             strategy: string
             string:
-              fmt: "%s/%s-bucket"
+              fmt: "%s/dev/bucket"

@@ -40,7 +40,7 @@ kubectl apply -f storeconfig.yaml
 
 # application stuff
 
-ubectl -n vault-system exec -i vault-0 -- sh
+kubectl -n vault-system exec -i vault-0 -- sh
 # in vault conainer
 ACCESSOR=$(vault auth list | grep kubernetes | tr -s ' ' | cut -d ' ' -f3)
 

@@ -9,6 +9,5 @@ spec:
         vault.hashicorp.com/agent-inject-secret-bucket: 'secret/crossplane-system/application1/dev/bucket'
         vault.hashicorp.com/agent-inject-template-bucket: |
           {{- with secret "secret/crossplane-system/application1/dev/bucket" -}}
-          bucket name: {{ .Data.data.endpoint }}
-          region: {{ .Data.data.region }}\n
+          bucket name: {{ .Data.data.endpoint }} -- region: {{ .Data.data.region }}
           {{- end -}}
