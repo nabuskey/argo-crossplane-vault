@@ -8,9 +8,9 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: 'true'
         vault.hashicorp.com/role: 'k8s-application'
-        vault.hashicorp.com/agent-inject-secret-database-config.txt: 'secret/crossplane-system/application1/dev/bucket'
+        vault.hashicorp.com/agent-inject-secret-bucket: 'secret/crossplane-system/application1/dev/bucket'
         vault.hashicorp.com/agent-inject-status: 'update'
-        vault.hashicorp.com/agent-inject-template-database-config.txt: |
+        vault.hashicorp.com/agent-inject-template-bucket: |
           {{- with secret "secret/crossplane-system/application1/dev/bucket" -}}
           bucket name: {{ .Data.data.endpoint }}
           region: {{ .Data.data.region }}

@@ -22,4 +22,4 @@ spec:
             - "/bin/bash"
           args:
             - "-c"
-            - 'while true; do echo "test"; sleep 120 ; done'
+            - 'while true; do cat vault/secrets/bucket; sleep 120 ; done'
