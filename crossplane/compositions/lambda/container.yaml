@@ -1,0 +1,163 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: container.lambda.jet.awsblueprints.io
+  labels:
+    awsblueprints.io/provider: aws-jet
+    awsblueprints.io/environment: dev
+spec:
+  publishConnectionDetailsWithStoreConfigRef:
+    name: vault
+  compositeTypeRef:
+    apiVersion: awsblueprints.io/v1alpha1
+    kind: XFunction
+  patchSets:
+    - name: common-fields
+      patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.deletionPolicy
+          toFieldPath: spec.deletionPolicy
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.region
+          toFieldPath: spec.forProvider.region
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.tags
+          toFieldPath: spec.forProvider.tags
+          policy:
+            mergeOptions:
+              appendSlice: true
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.name
+          toFieldPath: metadata.annotations[crossplane.io/external-name]
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.resourceConfig.providerConfigName
+          toFieldPath: spec.providerConfigRef.name
+  resources:
+    - name: function
+      base:
+        apiVersion: lambda.aws.crossplane.io/v1beta1
+        kind: Function
+        spec:
+          deletionPolicy: Delete
+          publishConnectionDetailsTo:
+            name: to-be-patched
+            configRef:
+              name: vault
+          forProvider:
+            code:
+              imageURI: to-be-patched
+            memorySize: 128
+            timeout: 30
+            packageType: Image
+            roleSelector:
+              matchControllerRef: true
+      patches:
+        - type: PatchSet
+          patchSetName: common-fields
+        - type: FromCompositeFieldPath
+          fromFieldPath: metadata.name
+          toFieldPath: spec.forProvider.functionName
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.imageUri
+          toFieldPath: spec.forProvider.code.imageURI
+        # - type: FromCompositeFieldPath
+        #   fromFieldPath: spec.handler
+        #   toFieldPath: spec.forProvider.handler
+        # - type: FromCompositeFieldPath
+        #   fromFieldPath: status.functionRoleArn
+        #   toFieldPath: spec.forProvider.role
+        - type: ToCompositeFieldPath
+          fromFieldPath: status.atProvider.arn
+          toFieldPath: status.functionArn
+        - type: ToCompositeFieldPath
+          fromFieldPath: status.atProvider.id
+          toFieldPath: status.functionName
+        - type: CombineFromComposite
+          policy:
+            fromFieldPath: Required
+          fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
+          toFieldPath: spec.publishConnectionDetailsTo.name
+          combine:
+            variables:
+              - fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
+              - fromFieldPath: metadata.name
+            strategy: string
+            string:
+              fmt: "%s/dev/%s-function"
+    - name: function-role
+      base:
+        apiVersion: iam.aws.crossplane.io/v1beta1 # https://github.com/crossplane-contrib/provider-jet-aws/issues/176
+        kind: Role
+        spec:
+          deletionPolicy: Delete
+          publishConnectionDetailsTo:
+            name: to-be-patched
+            configRef:
+              name: vault
+          forProvider:
+            assumeRolePolicyDocument: |-
+              {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                      {
+                          "Effect": "Allow",
+                          "Principal": {
+                              "Service": "lambda.amazonaws.com"
+                          },
+                          "Action": "sts:AssumeRole"
+                      }
+                  ]
+              }
+      patches:
+        - type: PatchSet
+          patchSetName: common-fields
+        - type: ToCompositeFieldPath
+          fromFieldPath: status.atProvider.arn
+          toFieldPath: status.functionRoleArn
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.permissionsBoundaryArn
+          toFieldPath: spec.forProvider.permissionsBoundary
+        - type: CombineFromComposite
+          policy:
+            fromFieldPath: Required
+          fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
+          toFieldPath: spec.publishConnectionDetailsTo.name
+          combine:
+            variables:
+              - fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
+              - fromFieldPath: metadata.name
+            strategy: string
+            string:
+              fmt: "%s/dev/%s-role"
+    - name: lambda-basic-policy-attachment
+      base:
+        apiVersion: iam.aws.crossplane.io/v1beta1
+        kind: RolePolicyAttachment
+        spec:
+          publishConnectionDetailsTo:
+            name: to-be-patched
+            configRef:
+              name: vault
+          forProvider:
+            policyArn: arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+            roleNameSelector:
+              matchControllerRef: true
+      patches:
+        - type: PatchSet
+          patchSetName: common-fields
+        - type: CombineFromComposite
+          policy:
+            fromFieldPath: Required
+          fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
+          toFieldPath: spec.publishConnectionDetailsTo.name
+          combine:
+            variables:
+              - fromFieldPath: metadata.labels[crossplane.io/claim-namespace]
+              - fromFieldPath: metadata.name
+            strategy: string
+            string:
+              fmt: "%s/dev/%s-role-attachment"
+        
