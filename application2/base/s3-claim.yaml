@@ -1,0 +1,20 @@
+apiVersion: awsblueprints.io/v1alpha1
+kind: ObjectStorage
+metadata:
+  name: standard-object-storage
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  compositionSelector:
+    matchLabels:
+      awsblueprints.io/provider: aws
+      awsblueprints.io/environment: dev
+      s3.awsblueprints.io/configuration: standard-multi-tenant
+  resourceConfig:
+    providerConfigName: invalid
+    region: us-west-2
+    tags:
+      - key: env
+        value: test
+      - key: anotherKey
+        value: anotherValue

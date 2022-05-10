@@ -32,9 +32,6 @@ kubectl port-forward svc/argocd-server -n argocd 8080:443
 ```
 Go to https://localhost:8080 then login with user name `admin` and password from the above command.
 
-### install crossplane
-WIP 
-
 ### install Vault
 
 ```bash
@@ -44,6 +41,7 @@ Wait for the vault application in ArgoCD to become healthy.
 
 #### configure vault
 TODO: automate this
+
 Based on [this guide](https://github.com/crossplane/crossplane/blob/master/docs/guides/vault-as-secret-store.md) from Crossplane repository. See the guide if you want to know more about this process.
 
 ```bash 
@@ -73,7 +71,7 @@ path "secret/metadata/*" {
 }
 EOF
 
-kubectl -n vault-system exec -it vault-0 -- vault write auth/kubernetes/role/crossplane \
+vault write auth/kubernetes/role/crossplane \
     bound_service_account_names="*" \
     bound_service_account_namespaces=crossplane-system \
     policies=crossplane \
@@ -82,7 +80,7 @@ kubectl -n vault-system exec -it vault-0 -- vault write auth/kubernetes/role/cro
 # create policy and role for applications to use.
 ACCESSOR=$(vault auth list | grep kubernetes | tr -s ' ' | cut -d ' ' -f3)
 
-ault policy write k8s-application - << EOF
+vault policy write k8s-application - << EOF
 path "secret/data/crossplane-system/{{identity.entity.aliases.${ACCESSOR}.metadata.service_account_namespace}}/*" {
   capabilities = ["read", "list"]
 }
@@ -98,4 +96,16 @@ vault write auth/kubernetes/role/k8s-application \
     ttl=1h
 ```
 
+### install crossplane
 
+```bash
+kubectl create ns crossplane-system
+helm upgrade --install crossplane --namespace crossplane-system crossplane-stable/crossplane --version 1.7.0 --values crossplane/values.yaml
+
+
+kubectl apply -f crossplane/providers/aws/aws-provider.yaml
+kubectl apply -f crossplane/providers/aws/aws-jet-provider.yaml
+
+kubectl apply -f crossplane/storeconfig.yaml
+
+```
