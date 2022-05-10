@@ -1,0 +1,10 @@
+apiVersion: aws.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  annotations: {}
+  name: application1-provider-config
+spec:
+  assumeRole:
+    roleARN: arn:aws:iam::ACCOUNT_ID:role/crossplane-provider-aws
+  credentials:
+    source: InjectedIdentity

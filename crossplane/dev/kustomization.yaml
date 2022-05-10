@@ -1,0 +1,7 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../base
+patchesStrategicMerge:
+  - patch-aws-provider-controller-config.yaml
+  - patch-application1-provider-config.yaml

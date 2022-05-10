@@ -1,0 +1,8 @@
+apiVersion: aws.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  annotations: {}
+  name: application2-provider-config
+spec:
+  credentials:
+    source: InjectedIdentity

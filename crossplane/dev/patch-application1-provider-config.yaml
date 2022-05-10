@@ -1,0 +1,7 @@
+apiVersion: aws.crossplane.io/v1beta1
+kind: ProviderConfig
+metadata:
+  name: application1-provider-config
+spec:
+  assumeRole:
+    roleARN: arn:aws:iam::618846856162:role/crossplane-provider-aws
