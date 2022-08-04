@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: example-app1
+  labels:
+    app: example-app1
+spec:
+  selector:
+    matchLabels:
+      app: example-app1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        vault.hashicorp.com/agent-inject: 'true'
+        vault.hashicorp.com/role: 'k8s-application'
+        vault.hashicorp.com/agent-inject-status: 'update'
+      labels:
+        app: example-app1
+    spec:
+      serviceAccountName: application1
+      containers:
+        - name: ubuntu
+          image: ubuntu:22.04
+          command:
+            - "/bin/bash"
+          args:
+            - "-c"
+            - 'while true; do cat vault/secrets/bucket; sleep 120 ; done'

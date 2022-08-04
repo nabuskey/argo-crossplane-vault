@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: application3
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nabuskey/argo-crossplane-vault.git
+    targetRevision: HEAD
+    path: application3/dev/
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: application3
+  syncPolicy:
+    automated: {}
+    syncOptions:
+      - CreateNamespace=true
