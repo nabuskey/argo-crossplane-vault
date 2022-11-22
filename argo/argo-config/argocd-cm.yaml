@@ -7,6 +7,8 @@ metadata:
     app.kubernetes.io/name: argocd-cm
     app.kubernetes.io/part-of: argocd
 data:
+  application.resourceTrackingMethod: annotation
+  accounts.userone: login
   resource.customizations.health.awsblueprints.io_ObjectStorage: |
     hs = {}
     if obj.status ~= nil then
